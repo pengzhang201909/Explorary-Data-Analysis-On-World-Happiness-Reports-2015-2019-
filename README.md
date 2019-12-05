@@ -5,9 +5,9 @@ Introduction
 
 Everyone is looking for happiness. Then what factors influence man's feeling about happiness? Great income, healthy body, perfect family, enough freedom, generous neighbourhood and community, incorruptible governance,... It looks every individual factor does not define happiness directly but to some extent they play their roles in the process of how to feel happiness.
 
-In this report we will analyze three charactistics of happiness across the world. First what was the trend of world happiness ranking recently. In other words, the world felt more happiness, or in reverse? Then among six factors mentioned above, which would be most likely to explain why people in one nation felt happier than another. At last we will focus on some countries which have experienced huge happiness ranking changes, and try to find the reasons.
+In this report we will analyze three characteristics of happiness across the world. First what was the trend of world happiness ranking recently. In other words, the world felt more happiness, or in reverse? Then among six factors mentioned above, which would be most likely to explain why people in one nation felt happier than another. At last we will focus on some countries which have experienced huge happiness ranking changes, and try to find the reasons.
 
-Certainly in this interesting analysis journey we will use the UN Happiness Reports from 2015 to 2019, and explorary data analysis tools in R.
+Certainly in this interesting analysis journey we will use the UN World Happiness Reports from 2015 to 2019, and explorary data analysis tools in R.
 
 Thank the United Nations Sustainable Development Solutions Network for providing World Happiness Report annually. Let's have this opportunity of Quantitative Analysis on World Happiness.
 
