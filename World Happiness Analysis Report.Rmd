@@ -275,24 +275,28 @@ preds %>%
 
 ### Question 2: How does democracy affect country happiness? (MICHAEL'S CONTRIBUTION)
 
-To answer this question, we'll need a way to measure a country's democracy level. We'll use the data from https://www.gapminder.org/data/documentation/democracy-index/, which gives each country a democracy index, where the more democratic a country is, the higher their democracy index is.
+To measure a country's democracy level, we'll use the data from https://www.gapminder.org/data/documentation/democracy-index/, which assigns each country a democracy index. The more democratic freedoms a country has, the higher their democracy index.
 
 
 ```{r message=FALSE}
 democracy <- read_csv("DemocracyIndex.csv")
 democracy <- democracy %>%
+  #only the year, country, and democracy index columns are needed
   select(2,3,4) %>%
+  #we only care about 2015+
   dplyr::filter(time>=2015) %>%
+  #rename the columns
   transmute(year=as.character(time),country=name,DemocracyIndex = `Democracy index (EIU)`)
 glimpse(democracy)
 ```
 
-Figure 2.1, The Democracy table has 3 variables, and Democracy is a scale from 0-100 that gets higher the more democratic freedoms a country has.
+Figure 2.1, The Democracy table has 3 variables, and DemocracyIndex is a scale from 0-100 that gets higher the more democratic freedoms a country has.
 
-One problem is that the democracy index dataset only provides data up to year 2018, so we'll exclude the year 2019 from our analysis.
+This data table only provides data up to year 2018, so we'll exclude the year 2019 from our analysis.
 
 ```{r}
 w3 <- w2 %>%
+  #Get rid of year 2019 from our original dataset
   dplyr::filter(year != 2019) %>%
   mutate(year = as.character(year))
 ```
@@ -321,6 +325,7 @@ w3 <- w3 %>%
   dplyr::filter(country != "Ivory Coast")
 ```
 
+Our 2 datasets are tidy and are ready to merge.
 
 ```{r}
 data <- left_join(w3,democracy)
@@ -329,32 +334,35 @@ glimpse(data)
 
 Figure 2.3 A glimpse of what our final dataset looks like when the democracy index is added in.
 
-Now that we've finished combining the datasets, let's visualize the relationship between the democracy index and happiness.
+Let's visualize the relationship between the democracy index and happiness to spot any patterns.
 
 ```{r}
 data %>%
   ggplot() + 
-  geom_point(aes(DemocracyIndex,score)) + 
-  geom_smooth(aes(DemocracyIndex,score),se=FALSE) +
+  geom_point(aes(DemocracyIndex,score,color=year),size=0.9,alpha=7/8) + 
+  geom_smooth(aes(DemocracyIndex,score,color=year),se=FALSE) +
   facet_wrap(~year) + 
-  labs(x="Democracy Index",y="Happiness Score", title="Democracy Index vs Happiness Score by Year",caption="Figure 2.4 Visualizing the trend between democracy index and happiness score. We can an approximate linear/quadratic regression.") + 
+  labs(x="Democracy Index",y="Happiness Score", title="Democracy Index vs Happiness Score by Year",caption="Figure 2.4 Visualizing the trend between democracy index and happiness score. We can an approximate quadratic regression.") + 
   theme_bw()
 ```
 
-For each of the years, we can clearly see a mediocre positive quadratic relationship between the democracy index and their happiness score. Although there's more variation near the lower end of the democracy index, there's a strong correlation near the higher end of the demoracy index.
+For each of the years, we can see a mediocre positive quadratic relationship between the democracy index and their happiness score. Although there's more variation near the lower end of the democracy index, there's a strong correlation near the higher end of the demoracy index.
 
 We will build a quadratic model that best fits the dataset using mean-square residuals.
 
 ```{r}
+#Our quadratic model takes 3 parameters: a+ bx + cx^2
 quadratic_model <- function(a, data) {
   a[1] + data$DemocracyIndex * a[2] + a[3] * (data$DemocracyIndex^2)
 }
 
+#The best model will have the smallest mean square residuals
 measure_distance <- function(model, data) {
   difference <- data$score - quadratic_model(model, data)
   sqrt(mean(difference ^ 2))
 }
 
+#Create a dataset for each year so we can analyze them individually
 data2015 <- data %>%
   dplyr::filter(year==2015)
 data2016 <- data %>%
@@ -364,11 +372,13 @@ data2017 <- data %>%
 data2018 <- data %>%
   dplyr::filter(year==2018)
 
+#Find the best parameters for our quadratic model for each year
 best2015 <- optim(c(0, 0, 0), measure_distance, data = data2015)
 best2016 <- optim(c(0, 0, 0), measure_distance, data = data2016)
 best2017 <- optim(c(0, 0, 0), measure_distance, data = data2017)
 best2018 <- optim(c(0, 0, 0), measure_distance, data = data2018)
 
+#Create a quadratic function for each model so we can plot them on our graph
 function2015 <- function(x){ best2015$par[1] + best2015$par[2]*x + best2015$par[3]*(x^2) }
 function2016 <- function(x){ best2016$par[1] + best2016$par[2]*x + best2016$par[3]*(x^2) }
 function2017 <- function(x){ best2017$par[1] + best2017$par[2]*x + best2017$par[3]*(x^2) }
@@ -379,14 +389,51 @@ function2018 <- function(x){ best2018$par[1] + best2018$par[2]*x + best2018$par[
 
 ```{r}
 ggplot(data2015) +
-  geom_point(aes(DemocracyIndex,score)) +
-  stat_function(fun = function2015)
+  geom_point(aes(DemocracyIndex,score),color="red") +
+  #stat_function() plots a function
+  stat_function(fun = function2015) + 
+  theme_bw() + 
+  labs(title="2015",x="Democracy Index",y="Happiness Score",caption="Figure 2.5 Qudratic Regression for 2015")
+
+ggplot(data2016) +
+  geom_point(aes(DemocracyIndex,score),color="green") +
+  #stat_function() plots a function
+  stat_function(fun = function2016) + 
+  theme_bw() + 
+  labs(title="2016",x="Democracy Index",y="Happiness Score",caption="Figure 2.6 Qudratic Regression for 2016")
+
+ggplot(data2017) +
+  geom_point(aes(DemocracyIndex,score),color="blue") +
+  #stat_function() plots a function
+  stat_function(fun = function2017) + 
+  theme_bw() + 
+  labs(title="2017",x="Democracy Index",y="Happiness Score",caption="Figure 2.7 Qudratic Regression for 2017")
+
+ggplot(data2018) +
+  geom_point(aes(DemocracyIndex,score),color="purple") +
+  #stat_function() plots a function
+  stat_function(fun = function2018) + 
+  theme_bw() + 
+  labs(title="2018",x="Democracy Index",y="Happiness Score",caption="Figure 2.8 Qudratic Regression for 2018")
 ```
 
+The quadratic regression appears to fit greatly, but we must make sure that our residual plots don't exhibit any patterns, and the residual histogram must be approximately normal. The formula for a residual is (actual - expected).
 
 ```{r}
-geom_
+data2015 <- data2015 %>%
+  mutate(residual = round(score - function2015(DemocracyIndex),2))
+data2016 <- data2016 %>%
+  mutate(residual = round(score - function2016(DemocracyIndex),2))
+data2017 <- data2017 %>%
+  mutate(residual = round(score - function2017(DemocracyIndex),2))
+data2018 <- data2018 %>%
+  mutate(residual = round(score - function2018(DemocracyIndex),2))
 ```
+
+
+
+
+
 
 
 
