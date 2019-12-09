@@ -2,11 +2,11 @@
 title: "Explorary Data Analysis On World Happiness Reports(2015-2019)"
 subtitle: "By Michael Chen, Alex Zhangpeng, Su Hongyang"
 output: 
-  pdf_document: default
-  github_document:
-    default
   html_document:
     df_print: paged
+  github_document:
+    default
+  pdf_document: default
 ---
 
 ```{r, echo=FALSE}
@@ -161,7 +161,7 @@ w2 <- w2 %>% select(-10) %>%
 
 ### Question 1: What was the trend of world happiness scores from 2015 to 2019?
 
-I combined the all data of for 5 years, and added Region for the last three years.
+I combined all of the data for 5 years, and added Region for the last three years.
 ```{r message=FALSE}
 aaa <- read_csv("2015.csv")
 Country_Region <- aaa %>%
@@ -189,14 +189,14 @@ da18 <- read_csv("2018.csv")
 rank2018 <- da18 %>%
   rename(Country=`Country or region`) %>%
   rename(Rank=`Overall rank`) %>%
-left_join(Country_Region,by = "Country")%>%
+  left_join(Country_Region,by = "Country")%>%
   select(Country,Region,Rank, Score) %>%
   mutate(year="2018")
 da19 <- read_csv("2019.csv")
 rank2019 <- da19 %>%
   rename(Country=`Country or region`) %>%
   rename(Rank=`Overall rank`) %>%
-left_join(Country_Region,by = "Country")%>%
+  left_join(Country_Region,by = "Country")%>%
   select(Country,Region,Rank, Score) %>%
   mutate(year="2019")
 total<- tibble(
@@ -474,6 +474,29 @@ data %>%
 
 
 
+```{r}
+#a[1] = max value
+#a[2] = curve steepness
+#a[3] = midpoint
+sigmoid_model <- function(a, data){a[1]/ (1+ (exp (-a[2]* (data$DemocracyIndex-a[3]) ) ) )}
+
+measure_distance <- function(model, data) {
+  difference <- data$score - sigmoid_model(model, data)
+  sqrt(mean(difference ^ 2))
+}
+
+best2015 <- optim(c(5, 50, 70), measure_distance, data = data2015)
+best2016 <- optim(c(5, 50, 70), measure_distance, data = data2016)
+best2017 <- optim(c(5, 50, 70), measure_distance, data = data2017)
+best2018 <- optim(c(5, 50, 70), measure_distance, data = data2018)
+
+function2015 <- function(x){ best2015$par[1] / (1+ (exp (-best2015$par[2]* (x - best2015$par[3]) ) ) )}
+function2016 <- function(x){ best2016$par[1] / (1+ (exp (-best2016$par[2]* (x - best2016$par[3]) ) ) )}
+function2017 <- function(x){ best2017$par[1] / (1+ (exp (-best2017$par[2]* (x - best2017$par[3]) ) ) )}
+function2018 <- function(x){ best2018$par[1] / (1+ (exp (-best2018$par[2]* (x - best2018$par[3]) ) ) )}
+
+best2015
+```
 
 
 
