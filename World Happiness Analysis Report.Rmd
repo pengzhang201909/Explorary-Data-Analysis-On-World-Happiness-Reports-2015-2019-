@@ -1,5 +1,6 @@
 ---
 title: "Explorary Data Analysis On World Happiness Reports(2015-2019)"
+subtitle: "By Michael Chen, Alex Zhangpeng, Su Hongyang"
 output: 
   pdf_document: default
   github_document:
@@ -7,7 +8,6 @@ output:
   html_document:
     df_print: paged
 ---
-
 
 ```{r, echo=FALSE}
 knitr::opts_chunk$set(error = TRUE)
@@ -22,6 +22,8 @@ library(splines)
 library(modelr)
 library(forcats)
 ```
+
+
 
 ## Introduction
 
@@ -157,9 +159,8 @@ w2 <- w2 %>% select(-10) %>%
 ```
 
 
-### Question 1: HONGYANG'S CONTRIBUTION 
+### Question 1: What was the trend of world happiness scores from 2015 to 2019?
 
- What was the trend of world happiness scores from 2015 to 2019?
 I combined the all data of for 5 years, and added Region for the last three years.
 ```{r message=FALSE}
 aaa <- read_csv("2015.csv")
@@ -167,37 +168,37 @@ Country_Region <- aaa %>%
   select(Country, Region)
 da15 <- read_csv("2015.csv")  
 rank2015 <- da15 %>%
- select(Country,Region,`Happiness Rank`,`Happiness Score`) %>%
- rename(Rank=`Happiness Rank`) %>%
- rename(Score=`Happiness Score`) %>%
- mutate(year="2015")
+  select(Country,Region,`Happiness Rank`,`Happiness Score`) %>%
+  rename(Rank=`Happiness Rank`) %>%
+  rename(Score=`Happiness Score`) %>%
+  mutate(year="2015")
 da16 <- read_csv("2016.csv")
 rank2016 <- da16 %>%
- select(Country,Region,`Happiness Rank`,`Happiness Score`) %>%
- rename(Rank=`Happiness Rank`) %>%
- rename(Score=`Happiness Score`) %>%
- mutate(year="2016")
+  select(Country,Region,`Happiness Rank`,`Happiness Score`) %>%
+  rename(Rank=`Happiness Rank`) %>%
+  rename(Score=`Happiness Score`) %>%
+  mutate(year="2016")
 da17 <- read_csv("2017.csv")
 rank2017 <- da17 %>%
- left_join(Country_Region,by = "Country")%>%
- select(Country,Region,Happiness.Rank,Happiness.Score) %>%
- rename(Rank=Happiness.Rank) %>%
- rename(Score=Happiness.Score) %>%
- mutate(year="2017")
+  left_join(Country_Region,by = "Country")%>%
+  select(Country,Region,Happiness.Rank,Happiness.Score) %>%
+  rename(Rank=Happiness.Rank) %>%
+  rename(Score=Happiness.Score) %>%
+  mutate(year="2017")
 da18 <- read_csv("2018.csv")
 rank2018 <- da18 %>%
- rename(Country=`Country or region`) %>%
- rename(Rank=`Overall rank`) %>%
+  rename(Country=`Country or region`) %>%
+  rename(Rank=`Overall rank`) %>%
 left_join(Country_Region,by = "Country")%>%
- select(Country,Region,Rank, Score) %>%
+  select(Country,Region,Rank, Score) %>%
   mutate(year="2018")
 da19 <- read_csv("2019.csv")
 rank2019 <- da19 %>%
- rename(Country=`Country or region`) %>%
- rename(Rank=`Overall rank`) %>%
+  rename(Country=`Country or region`) %>%
+  rename(Rank=`Overall rank`) %>%
 left_join(Country_Region,by = "Country")%>%
- select(Country,Region,Rank, Score) %>%
- mutate(year="2019")
+  select(Country,Region,Rank, Score) %>%
+  mutate(year="2019")
 total<- tibble(
   Country=c(rank2015$Country ,rank2016$Country ,rank2017$Country  ,rank2018$Country ,rank2019$Country),
   Region=c(rank2015$Region ,rank2016$Region ,rank2017$Region  ,rank2018$Region ,rank2019$Region),
@@ -205,7 +206,7 @@ total<- tibble(
   Score=c(rank2015$Score ,rank2016$Score ,rank2017$Score ,rank2018$Score ,rank2019$Score),
   year=c(rank2015$year ,rank2016$year ,rank2017$year ,rank2018$year ,rank2019$year)
   ) %>%
-arrange(Country,Rank)
+  arrange(Country,Rank)
 totl <- na.omit(total)  
 ```
 
@@ -303,15 +304,15 @@ w3 <- w2 %>%
 
 We must also rename the countries so that they'll have the same name in both datasets, and get rid of any countries that aren't in both datasets.
 
-We'll do this by first gathering a list of countries that are included in w2, but not in democracy.
+We'll do this by first gathering a list of countries that aren't included in both datasets.
 
-```{r}
+```{r message=FALSE}
 anti_join(w3,democracy) %>% select(country)
 ```
 
 Table 2.2 Countries that are either not present in both datasets, or are named differently
 
-Then we'll look through each of them using `democracy$country` and determine if the countries in democracy should be renamed, or if the country in w2 should be removed.
+Then we'll look through each of them using `democracy$country` and determine if the countries should be renamed or removed
 
 ```{r}
 democracy$country[633:636] = "United States"
@@ -327,7 +328,7 @@ w3 <- w3 %>%
 
 Our 2 datasets are tidy and are ready to merge.
 
-```{r}
+```{r message=FALSE}
 data <- left_join(w3,democracy)
 glimpse(data)
 ```
@@ -336,13 +337,13 @@ Figure 2.3 A glimpse of what our final dataset looks like when the democracy ind
 
 Let's visualize the relationship between the democracy index and happiness to spot any patterns.
 
-```{r}
+```{r message=FALSE}
 data %>%
   ggplot() + 
   geom_point(aes(DemocracyIndex,score,color=year),size=0.9,alpha=7/8) + 
   geom_smooth(aes(DemocracyIndex,score,color=year),se=FALSE) +
   facet_wrap(~year) + 
-  labs(x="Democracy Index",y="Happiness Score", title="Democracy Index vs Happiness Score by Year",caption="Figure 2.4 Visualizing the trend between democracy index and happiness score. We can an approximate quadratic regression.") + 
+  labs(x="Democracy Index",y="Happiness Score", title="Democracy Index vs Happiness Score by Year",caption="Figure 2.4 Visualizing the trend between democracy index and happiness score.") + 
   theme_bw()
 ```
 
@@ -417,9 +418,9 @@ ggplot(data2018) +
   labs(title="2018",x="Democracy Index",y="Happiness Score",caption="Figure 2.8 Qudratic Regression for 2018")
 ```
 
-The quadratic regression appears to fit greatly, but we must make sure that our residual plots don't exhibit any patterns, and the residual histogram must be approximately normal. The formula for a residual is (actual - expected).
+The quadratic regression appears to fit greatly, but we must make sure that our residual plots don't exhibit any patterns, and the residuals should be distributed approximately normal around 0. The formula for a residual is (actual - expected).
 
-```{r}
+```{r message=FALSE}
 data2015 <- data2015 %>%
   mutate(residual = round(score - function2015(DemocracyIndex),2))
 data2016 <- data2016 %>%
@@ -428,9 +429,48 @@ data2017 <- data2017 %>%
   mutate(residual = round(score - function2017(DemocracyIndex),2))
 data2018 <- data2018 %>%
   mutate(residual = round(score - function2018(DemocracyIndex),2))
+
+#put all the residuals into our original dataset
+data <-  data2015 %>%
+  full_join(data2016) %>%
+  full_join(data2017) %>%
+  full_join(data2018)
 ```
 
+Now that we calculated our residua
 
+```{r}
+ggplot(data) + 
+  geom_freqpoly(aes(residual,color=year),binwidth=0.2) + 
+  geom_vline(xintercept=0,color="magenta",alpha=3/4) +
+  facet_wrap(~year) + 
+  theme_bw() + 
+  labs(x="Residuals",y="Frequency",title="Residual Distribution",caption="Figure 2.6 Distribution of Residuals")
+```
+
+Every year's residual distribution is approximately normal and centered around 0.
+
+```{r}
+ggplot(data) + 
+  geom_hline(yintercept = 0,color="magenta",size=1.4) + 
+  geom_point(aes(DemocracyIndex,residual,color=year)) + 
+  facet_wrap(~year) + 
+  theme_bw() + 
+  labs(title="Residual Plots",x="Democracy Index",y="Residuals",caption="Figure 2.7 Residual Plots")
+```
+
+The residual plots show no pattern, so our model is a good predictor.
+
+
+
+Should I add more? I can explore this interesting graph:
+
+```{r}
+data %>%
+  ggplot() + 
+  geom_point(aes(DemocracyIndex,trust,color=year),size=0.9,alpha=7/8) +
+  facet_wrap(~year)
+```
 
 
 
