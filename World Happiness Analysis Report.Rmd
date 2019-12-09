@@ -39,7 +39,7 @@ We were excited to find the UN World Happiness Reports have an index called as n
 
 Q1, What was the trend of world happiness scores from 2015 to 2019? In general, people felt more happiness from 2015 to 2019?
 
-Q2, Are countries more happier if they're democratic?
+Q2, Are countries more happier if they have more democratic freedoms?
 
 Q3, from 2015 to 2019, which countries experienced huge happiness score change , both positive and negtive?
 
