@@ -157,8 +157,123 @@ w2 <- w2 %>% select(-10) %>%
 ```
 
 
+### Question 1: HONGYANG'S CONTRIBUTION 
 
-### Question 2: How does democracy affect country happiness?
+ What was the trend of world happiness scores from 2015 to 2019?
+I combined the all data of for 5 years, and added Region for the last three years.
+```{r message=FALSE}
+aaa <- read_csv("2015.csv")
+Country_Region <- aaa %>%
+  select(Country, Region)
+da15 <- read_csv("2015.csv")  
+rank2015 <- da15 %>%
+ select(Country,Region,`Happiness Rank`,`Happiness Score`) %>%
+ rename(Rank=`Happiness Rank`) %>%
+ rename(Score=`Happiness Score`) %>%
+ mutate(year="2015")
+da16 <- read_csv("2016.csv")
+rank2016 <- da16 %>%
+ select(Country,Region,`Happiness Rank`,`Happiness Score`) %>%
+ rename(Rank=`Happiness Rank`) %>%
+ rename(Score=`Happiness Score`) %>%
+ mutate(year="2016")
+da17 <- read_csv("2017.csv")
+rank2017 <- da17 %>%
+ left_join(Country_Region,by = "Country")%>%
+ select(Country,Region,Happiness.Rank,Happiness.Score) %>%
+ rename(Rank=Happiness.Rank) %>%
+ rename(Score=Happiness.Score) %>%
+ mutate(year="2017")
+da18 <- read_csv("2018.csv")
+rank2018 <- da18 %>%
+ rename(Country=`Country or region`) %>%
+ rename(Rank=`Overall rank`) %>%
+left_join(Country_Region,by = "Country")%>%
+ select(Country,Region,Rank, Score) %>%
+  mutate(year="2018")
+da19 <- read_csv("2019.csv")
+rank2019 <- da19 %>%
+ rename(Country=`Country or region`) %>%
+ rename(Rank=`Overall rank`) %>%
+left_join(Country_Region,by = "Country")%>%
+ select(Country,Region,Rank, Score) %>%
+ mutate(year="2019")
+total<- tibble(
+  Country=c(rank2015$Country ,rank2016$Country ,rank2017$Country  ,rank2018$Country ,rank2019$Country),
+  Region=c(rank2015$Region ,rank2016$Region ,rank2017$Region  ,rank2018$Region ,rank2019$Region),
+  Rank=c(rank2015$Rank ,rank2016$Rank ,rank2017$Rank ,rank2018$Rank ,rank2019$Rank),
+  Score=c(rank2015$Score ,rank2016$Score ,rank2017$Score ,rank2018$Score ,rank2019$Score),
+  year=c(rank2015$year ,rank2016$year ,rank2017$year ,rank2018$year ,rank2019$year)
+  ) %>%
+arrange(Country,Rank)
+totl <- na.omit(total)  
+```
+
+The geom_line graph of happiness score.
+```{r}
+totl %>% 
+  ggplot(aes(year, Score, group = Country)) +
+    geom_line(alpha = 1/3)
+```
+
+Get the data of predictions and residuals.
+```{r}
+by_country <- totl%>% 
+  group_by(Country) %>% 
+  nest()
+country_model <- function(df) {
+  lm(Score ~ year, data = totl)
+}
+by_country <- by_country %>% 
+  mutate(model = map(by_country$data, country_model))
+by_country <- by_country %>% 
+  mutate(
+    pred = map2(data, model, add_predictions)
+  )
+preds <- unnest(by_country, pred)
+by_country <- by_country %>% 
+  mutate(
+    resids = map2(data, model, add_residuals)
+  )
+resids <- unnest(by_country, resids)
+resids
+```
+
+
+The boxplot graph of happiness score
+```{r}
+ggplot(resids, aes(year, Score)) +
+ geom_boxplot()
+```
+
+The graph of residuals.
+```{r}
+ggplot(resids, aes(year, resid)) +
+ geom_boxplot()
+```
+The graph of predictions.
+```{r}
+ggplot(preds, aes(year, pred)) +
+ geom_boxplot()
+```
+
+Then I separate the countries into different Regions to check each Continent's happiness score Continent.
+```{r}
+ggplot(resids, aes(year, Score)) +
+ geom_boxplot() +
+ facet_wrap(~ Region, nrow = 2)
+```
+
+The geom_line of predictions 
+```{r}
+preds %>% 
+  ggplot(aes(year, pred)) +
+    geom_line(aes(group = Country), alpha = 1/3) + 
+    geom_smooth(se = FALSE)
+```
+
+
+### Question 2: How does democracy affect country happiness? (MICHAEL'S CONTRIBUTION)
 
 To answer this question, we'll need a way to measure a country's democracy level. We'll use the data from https://www.gapminder.org/data/documentation/democracy-index/, which gives each country a democracy index, where the more democratic a country is, the higher their democracy index is.
 
@@ -220,12 +335,59 @@ Now that we've finished combining the datasets, let's visualize the relationship
 data %>%
   ggplot() + 
   geom_point(aes(DemocracyIndex,score)) + 
-  facet_wrap(~year)
+  geom_smooth(aes(DemocracyIndex,score),se=FALSE) +
+  facet_wrap(~year) + 
+  labs(x="Democracy Index",y="Happiness Score", title="Democracy Index vs Happiness Score by Year",caption="Figure 2.4 Visualizing the trend between democracy index and happiness score. We can an approximate linear/quadratic regression.") + 
+  theme_bw()
 ```
 
-For each of the years, we can clearly see a mediocre positive linear relationship between the democracy index and their happiness score. Although there's more variation near the lower end of the democracy index, there's a strong correlation near the higher end of the demoracy index.
+For each of the years, we can clearly see a mediocre positive quadratic relationship between the democracy index and their happiness score. Although there's more variation near the lower end of the democracy index, there's a strong correlation near the higher end of the demoracy index.
 
-We will build a linear model that best fits the dataset using mean-square residuals.
+We will build a quadratic model that best fits the dataset using mean-square residuals.
+
+```{r}
+quadratic_model <- function(a, data) {
+  a[1] + data$DemocracyIndex * a[2] + a[3] * (data$DemocracyIndex^2)
+}
+
+measure_distance <- function(model, data) {
+  difference <- data$score - quadratic_model(model, data)
+  sqrt(mean(difference ^ 2))
+}
+
+data2015 <- data %>%
+  dplyr::filter(year==2015)
+data2016 <- data %>%
+  dplyr::filter(year==2016)
+data2017 <- data %>%
+  dplyr::filter(year==2017)
+data2018 <- data %>%
+  dplyr::filter(year==2018)
+
+best2015 <- optim(c(0, 0, 0), measure_distance, data = data2015)
+best2016 <- optim(c(0, 0, 0), measure_distance, data = data2016)
+best2017 <- optim(c(0, 0, 0), measure_distance, data = data2017)
+best2018 <- optim(c(0, 0, 0), measure_distance, data = data2018)
+
+function2015 <- function(x){ best2015$par[1] + best2015$par[2]*x + best2015$par[3]*(x^2) }
+function2016 <- function(x){ best2016$par[1] + best2016$par[2]*x + best2016$par[3]*(x^2) }
+function2017 <- function(x){ best2017$par[1] + best2017$par[2]*x + best2017$par[3]*(x^2) }
+function2018 <- function(x){ best2018$par[1] + best2018$par[2]*x + best2018$par[3]*(x^2) }
+
+```
+
+
+```{r}
+ggplot(data2015) +
+  geom_point(aes(DemocracyIndex,score)) +
+  stat_function(fun = function2015)
+```
+
+
+```{r}
+geom_
+```
+
 
 
 
