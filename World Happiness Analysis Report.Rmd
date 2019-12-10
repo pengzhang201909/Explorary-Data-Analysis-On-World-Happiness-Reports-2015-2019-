@@ -1,6 +1,5 @@
 ---
 title: "Explorary Data Analysis On World Happiness Reports(2015-2019)"
-subtitle: "By Michael Chen, Alex Zhangpeng, Su Hongyang"
 output: 
   html_document:
     df_print: paged
@@ -8,6 +7,7 @@ output:
     default
   pdf_document: default
 ---
+
 
 ```{r, echo=FALSE}
 knitr::opts_chunk$set(error = TRUE)
@@ -23,12 +23,11 @@ library(modelr)
 library(forcats)
 ```
 
-
 ## Introduction
 
 Everyone is looking for happiness. Then what factors influence man's feeling about happiness? Great income, healthy body, perfect family, enough freedom, generous neighbourhood and community, incorruptible governance,... It looks every individual factor does not define happiness directly but to some extent they play their roles in the process of how to feel happiness.
 
-In this report we will analyze three characteristics of happiness across the world. First what was the trend of world happiness ranking recently. In other words, the world felt more happiness, or in reverse? Then, are countries more happier if they are more democratic? At last we will focus on some countries which have experienced huge happiness ranking changes, and try to find the reasons.
+In this report we will analyze three characteristics of happiness across the world. First what was the trend of world happiness ranking recently. In other words, the world felt more happiness, or in reverse? Then among six factors mentioned above, which would be most likely to explain why people in one nation felt happier than another. At last we will focus on some countries which have experienced huge happiness ranking changes, and try to find the reasons.
 
 Certainly in this report we will use the UN World Happiness Reports from 2015 to 2019, and explorary data analysis tools in R.
 
@@ -38,121 +37,176 @@ We were excited to find the UN World Happiness Reports have an index called as n
 
 Q1, What was the trend of world happiness scores from 2015 to 2019? In general, people felt more happiness from 2015 to 2019?
 
-Q2, Are countries more happier if they have more democratic freedoms?
+Q2, Among six factors ,which is the heaviest influencer on happiness score?
 
 Q3, from 2015 to 2019, which countries experienced huge happiness score change , both positive and negtive?
 
 ## Data Cleaning
 
-### 3E Rules
+### 4E Rules
 
-When facing the five World Happiness Report datasets, I remembered the three interrelated rules which make a dataset tidy: 1. each variable must have its own column; 2. each observation must have its own row; 3. each value must have its own cell. These rules(I call it 3E Rules) were just what I followed when cleaning datasets in this project.
+When facing the five World Happiness Report datasets, I remembered the three interrelated rules which make a dataset tidy: 1. each variable must have its own column; 2. each observation must have its own row; 3. each value must have its own cell.(https://r4ds.had.co.nz/tidy-data.html#fig:tidy-structure)
+
+Before starting on this project These rules were just what I followed when cleaning dataset. But now after the excited jouney of data cleaning for this project, I add the fourth rule: each tidy dataset must keep original information as accurate and complete as possible.
+
 
 ### Decide tidy dataset columns
 
-Firstly I found there were 9 common variables in five datasets: rank, country, score, gdp per capita, social support, life expectancy, freedom, generosity, trust. First three of them  delivered informations about countries' names and their happiness ranking, the other were six key explanatory factors. Nevermind they had differnet names in different reports sometimes, I could easily find they were pointing to the same variables. For example, in 2015 report dataset there was a variable "Trust (Government Corruption)",then in 2018 and 2019 report datasets a variable "Perceptions of corruption" has taken the place. Because these variables had necessary informations to answer our questions I'd like to use the nine variables to create new tidy data frame.
+Firstly I found there were 9 common variables in five datasets: rank, country, score, gdp per capita, social support, life expectancy, freedom, generosity, trust. First three of them  delivered informations about countries' names and their happiness rankings, the other were six key explanatory factors. Nevermind they had differnet names in different reports sometimes, I could easily find they were pointing to the same variables. For example, in 2015 report dataset there was a variable "Trust (Government Corruption)",then in 2018 and 2019 report datasets a variable "Perceptions of corruption" has taken the place. Because these variables had necessary informations to answer our questions I'd like to use the nine variables to create new tidy data frame.
 
 However in 2015,2016 and 2017 reports datasets variable "family" came out instead of "social support". I seached the official website for this variable( https://worldhappiness.report/ ). There was only social support in the documentations throughout five years reports. So I treated "family" as input error and replaced it with "social support".
 
-To analyze the changing trend of happiness among countries in the five years, I added time dimension with mutating column "year" .
+To analyze trend of happiness among countries in the five years, I added time dimension with mutating column "year" .
 
-When we have year and score columns, it's easy to caculate the ranking sequence for each country per year. Then I dropped the rank column off. Now nine columns again!
+When we have year and score columns, it's easy to caculate the ranking sequence for each country per year. Then I dropped rank column off. Now nine columns again!
 
-### Missing values
+### Missing values and input errors
 
-When reviewing the five original datasets in .csv type, I did NOT see any N/A character at all. After importing datasets, I met a problem when joining datasets. A warning message came out like this :
-"Error: Column `trust` can't be converted from numeric to factor." I had to check "trust" column in every dataset, only 2018.csv had "trust" column(origin was "Perceptions.of.corruption") treated as factor. Keeping forward, I carefully reviewed any element of this column until meeting a N/A. This observation has country name as United Arab Emirates with happiness rank 20 in 2018. From the documentations, I learned one regular technical remedy action was to borrow the value of last year.  
+After importing and reviewing the five original datasets in .csv type, I did NOT see any N/A value at all. When joining the datasets, I met a problem . A warning message came out like this :
+"Error: Column `trust` can't be converted from numeric to factor." I had to check "trust" column in every dataset. Only 2018.csv had "trust" column(origin was "Perceptions.of.corruption") treated as factor. Other "trust" columns in .csv files had dbl attribute. Keeping forward, I carefully reviewed any element of this column until meeting a N/A. This observation has country name as United Arab Emirates with happiness rank 20 in 2018. An opinion jumped to my mind that please drop the observation off as it was a missing value. 
 
-I found some 0's presenting the values of a couple of key explanatory factors. They might be missing or not. According to the documentations, 0 represented the worst possible life in the Cantril ladder survey. It was an option and had possibility. Because I did not know how to do with it , so I kept those 0's. Luckily I did not find any happiness score with the value of 0!!!Just a joke.
+I did not follow it, as I knew, if doing like that, other four observations marching this country name from other four datasets would be cut off as well(reason will be followed soon). Moreover there were two results followed: 1. this analysis report would be based on incomplete data, which means the possibility of wrong analysis conclusion goes up; 2. If some readers of this report were people from United Arab Emirates, I am absalutely sure they would be strongly unsatisfied. So I dicided to refer to original data. Below are two observations:
+Observation A20(from 2018.csv):
+20,United Arab Emirates,6.774,2.096,0.776,0.670,0.284,0.186,N/A
+Observation B20(from https://s3.amazonaws.com/happiness-report/2018/WHR2018Chapter2OnlineData.xls):
+20,United Arab Emirates,6.774,1.467,1.296,0.776,0.670,0.284,0.186
+
+We can see observation A20 added value of "2.096" at the positon of "1.467,1.296", then again "N/A" at the end.
+
+Story just began. In 2018.csv, observation A19(happiness rank 19 in 2018) was :
+19,Israel,6.814,1.301,1.559,0.883,0.533,0.354,0.272
+
+However B19(happiness rank 19 in 2018, from https://s3.amazonaws.com/happiness-report/2018/WHR2018Chapter2OnlineData.xls) was:
+19,United Kingdom,6.814,1.301,1.559,0.883,0.533,0.354,0.272
+The different country names were so obvious that everyone would realize them when checking A20 and B20. After comparing the values of happiness ranks and scores from 2017, 2018 and 2019, I exchanged the names of two countries in 2018.csv.
+
+I found some 0's presenting the values of a couple of key explanatory factors. They might be missing or not. According to the documentations, 0 represented the worst possible life in the Cantril ladder survey. It was an option and had possibility. Because I did not catch up with a better way, I kept those 0's. Luckily I did not find any happiness score with the value of 0!!!Just a joke.
 
 
 
 ### Dropped those countries which did not existed in all five years' datasets
 
-For keeping our analysis in a continous time dimension, I took out of those observations whose countries' names did not have five years' records. However there were a couple of execptions. "Hong Kong" and "Taiwan" existed in 2015, 2016,2018 and 2019 reports except 2017, because the name of "Hong Kong S.A.R., China" and "Taiwan Province of China" have taken them in this year report. I restored the names of "Hong Kong" and "Taiwan" to 2017 dataset.   
+For keeping our analysis in a continous time dimension, I took out of those observations whose countries' names did not have five years' records. However there were a couple of exceptions. "Hong Kong" and "Taiwan" existed in 2015, 2016,2018 and 2019 reports except 2017, because the names of "Hong Kong S.A.R., China" and "Taiwan Province of China" have taken them in this year report. I restored the names of "Hong Kong" and "Taiwan" to 2017 dataset.   
+
+Because having the background of Asian Cultrue, I easily recognized the situation of missing Hong Kong and Taiwan. Forward same things might happened to other countries whose names in those reports changed from 2017 to 2019. For verifying my hypothesis, I compared 2017 dataset to 2015 and 2019 datasets seperately, then two countries had been found as "North Cyprus" and "Trinidad and Tobago".
+
+
+
 
 ```{r}
-w_15 <- read.csv("2015.csv",stringsAsFactors = FALSE)
-w_16 <- read.csv("2016.csv",stringsAsFactors = FALSE)
-w_17 <- read.csv("2017.csv",stringsAsFactors = FALSE)
-w_18 <- read.csv("2018revised.csv",stringsAsFactors = FALSE)
-w_19 <- read.csv("2019.csv",stringsAsFactors = FALSE)
+w_15 <- read.csv("C:/Users/alex/Documents/worldhappinessreport/2015.csv",stringsAsFactors = FALSE)
+w_16 <- read.csv("C:/Users/alex/Documents/worldhappinessreport/2016.csv",stringsAsFactors = FALSE)
+w_17 <- read.csv("C:/Users/alex/Documents/worldhappinessreport/2017.csv",stringsAsFactors = FALSE)
+w_18 <- read.csv("C:/Users/alex/Documents/worldhappinessreport/2018.csv",stringsAsFactors = FALSE)
+w_19 <- read.csv("C:/Users/alex/Documents/worldhappinessreport/2019.csv",stringsAsFactors = FALSE)
 ```
 
 
 ```{r}
+country_region <- w_15 %>% select(1,2) %>% rename("country" = "Country", "region" = "Region")
 w_15$year <- 2015
-#glimpse(w_15)
+glimpse(w_15)
 ```
 
 ```{r}
 w_15 <- w_15 %>% select(-2,-3,-5,-12) %>% rename( 
 "country" = "Country", "score" = "Happiness.Score", "gdp" = "Economy..GDP.per.Capita.", "socsupport" = "Family", "lexp" = "Health..Life.Expectancy.", "freedom" = "Freedom", "generosity" = "Generosity", "trust" = "Trust..Government.Corruption.")
-#glimpse(w_15)
+glimpse(w_15)
 ```
 
 
 ```{r}
 w_16$year <- 2016
-#glimpse(w_16)
+glimpse(w_16)
 ```
 
 ```{r}
 w_16 <- w_16 %>% select(-2,-3,-5,-6,-13) %>% rename("country" = "Country", "score" = "Happiness.Score", "gdp" = "Economy..GDP.per.Capita.", "socsupport" = "Family", "lexp" = "Health..Life.Expectancy.", "freedom" = "Freedom", "generosity" = "Generosity", "trust" = "Trust..Government.Corruption.")
-#glimpse(w_16)
+glimpse(w_16)
 ```
 
 ```{r}
 w_17$year <- 2017
-#glimpse(w_17)
+glimpse(w_17)
 ```
 
 ```{r}
-w_17 <- w_17 %>% 
-  select(-2,-4,-5,-12) %>% 
-  rename("country" = "Country", "score" = "Happiness.Score", "gdp" = "Economy..GDP.per.Capita.", "socsupport" = "Family", "lexp" = "Health..Life.Expectancy.", "freedom" = "Freedom", "generosity" = "Generosity", "trust" = "Trust..Government.Corruption.")
-w_17$country[71] = "Hong Kong"
-w_17$country[33] = "Taiwan"
-#glimpse(w_17)
+w_17 <- w_17 %>% select(-2,-4,-5,-12) %>% rename("country" = "Country", "score" = "Happiness.Score", "gdp" = "Economy..GDP.per.Capita.", "socsupport" = "Family", "lexp" = "Health..Life.Expectancy.", "freedom" = "Freedom", "generosity" = "Generosity", "trust" = "Trust..Government.Corruption.")
+glimpse(w_17)
 ```
 
 ```{r}
 w_18$year <- 2018
-#glimpse(w_18)
+glimpse(w_18)
 ```
 
 ```{r}
 w_18 <- w_18 %>% select(-1) %>% rename("country" = "Country.or.region", "score" = "Score", "gdp" = "GDP.per.capita", "socsupport" = "Social.support", "lexp" = "Healthy.life.expectancy", "freedom" = "Freedom.to.make.life.choices", "generosity" = "Generosity", "trust" = "Perceptions.of.corruption")
-w_18$country[141] = "Trinidad and Tobago"
-#glimpse(w_18)
+glimpse(w_18)
 ```
 
 ```{r}
+w_18 <- w_18 %>% filter(country != "United Arab Emirates")
+w_18 <- w_18 %>% mutate(trust = as.double(w_18$trust))
+```
+
+
+
+```{r}
+add_United_Arab_Emirates <- tribble(
+  ~country, ~score, ~gdp, ~socsupport, ~lexp, ~freedom, ~generosity, ~trust, ~year,
+  "United Arab Emirates",6.774,1.467,1.296,0.776,0.670,0.284,0.186,2018
+  )
+w_18 <- w_18 %>% full_join(add_United_Arab_Emirates, by = c("country", "score", "gdp", "socsupport", "lexp", "freedom", "generosity", "trust", "year"))
+w_18$country[19] <- "United Kingdom"
+w_18$country[11] <- "Israel"
+w_18
+```
+
+
+
+```{r}
 w_19$year <- 2019
-#glimpse(w_19)
+glimpse(w_19)
 ```
 
 ```{r}
 w_19 <- w_19 %>% select(-1) %>% rename("country" = "Country.or.region", "score" = "Score", "gdp" = "GDP.per.capita", "socsupport" = "Social.support", "lexp" = "Healthy.life.expectancy", "freedom" = "Freedom.to.make.life.choices", "generosity" = "Generosity", "trust" = "Perceptions.of.corruption")
-w_19$country[141] = "Trinidad and Tobago"
-#glimpse(w_19)
+w_19
+```
+
+
+```{r}
+w_17 %>% anti_join(w_15, by = "country")
+```
+
+```{r}
+w_17$country[33] <- "Taiwan"
+w_17$country[71] <- "Hong Kong"
+```
+
+
+```{r}
+w_17 %>% anti_join(w_19, by = "country")
+```
+
+```{r}
+w_18$country[37] <- "Trinidad and Tobago"
+w_18$country[57] <- "North Cyprus"
+w_19$country[39] <- "Trinidad and Tobago"
+w_19$country[64] <- "North Cyprus"
 ```
 
 
 ```{r}
 w <- bind_rows(w_15,w_16,w_17,w_18,w_19)
+w
 ```
 
 
 ```{r}
-#Drop the countries that were not included in all 5 years. 2015+2016+2017+2018+2019 = 10085
-w2 <- w %>% group_by(country) %>% mutate(count = sum(year)) %>% dplyr::filter(count == 10085)
-w2 <- w2 %>% select(-10) %>%
-  mutate(gdp = round(gdp,3),
-         socsupport = round(socsupport,3),
-         lexp=round(lexp,3),
-         freedom=round(freedom,3),
-         trust=round(trust,3),
-         generosity=round(generosity,3))
-#glimpse(w2)
+w <- w %>% group_by(country) %>% mutate(count = sum(year)) %>% filter(count == sum(2015:2019))
+w <- w %>% select(-10) %>% left_join(country_region, by = "country")
+w
 ```
+
