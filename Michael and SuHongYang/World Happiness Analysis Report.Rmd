@@ -24,7 +24,6 @@ library(forcats)
 ```
 
 
-
 ## Introduction
 
 Everyone is looking for happiness. Then what factors influence man's feeling about happiness? Great income, healthy body, perfect family, enough freedom, generous neighbourhood and community, incorruptible governance,... It looks every individual factor does not define happiness directly but to some extent they play their roles in the process of how to feel happiness.
@@ -144,7 +143,6 @@ w_19$country[141] = "Trinidad and Tobago"
 w <- bind_rows(w_15,w_16,w_17,w_18,w_19)
 ```
 
-
 ```{r}
 #Drop the countries that were not included in all 5 years. 2015+2016+2017+2018+2019 = 10085
 w2 <- w %>% group_by(country) %>% mutate(count = sum(year)) %>% dplyr::filter(count == 10085)
@@ -210,16 +208,13 @@ total<- tibble(
 totl <- na.omit(total)  
 ```
 
-```{r}
-totl
-```
-
 
 The geom_line graph of happiness score.
 ```{r}
 totl %>% 
   ggplot(aes(year, Score, group = Country)) +
-    geom_line(alpha = 1/3)
+    geom_line(alpha = 1/3) + 
+    labs(caption="Figure 1.1")
 ```
 
 Get the data of predictions and residuals.
@@ -245,22 +240,26 @@ resids <- unnest(by_country, resids)
 resids
 ```
 
+Table 1.2
 
 The boxplot graph of happiness score
 ```{r}
 ggplot(resids, aes(year, Score)) +
- geom_boxplot()
+ geom_boxplot() + 
+  labs(caption="Figure 1.3")
 ```
 
 The graph of residuals.
 ```{r}
 ggplot(resids, aes(year, resid)) +
- geom_boxplot()
+ geom_boxplot() + 
+  labs(caption="Figure 1.4")
 ```
 The graph of predictions.
 ```{r}
 ggplot(preds, aes(year, pred)) +
- geom_point()
+ geom_point() + 
+  labs(caption = "Figure 1.5")
 ```
 
 Then I separate the countries into different Regions to check each Continent's happiness score Continent.
@@ -268,7 +267,8 @@ Then I separate the countries into different Regions to check each Continent's h
 ggplot(resids, aes(year, Score)) +
  geom_boxplot() +
  facet_wrap(~ Region, nrow = 2) + 
- theme(axis.text.x=element_text(angle=30, hjust=1))
+ theme(axis.text.x=element_text(angle=30, hjust=1)) + 
+  labs(caption = "Figure 1.6")
 ```
 
 The geom_line of predictions 
@@ -276,18 +276,14 @@ The geom_line of predictions
 preds %>% 
   ggplot(aes(year, pred)) +
     geom_line(aes(group = Country), alpha = 1/3) + 
-    geom_point()
-```
-
-```{r}
-preds
+    geom_point() + 
+  labs(caption="Figure 1.7")
 ```
 
 
+### Question 2: How does a country's amount of democratic freedoms affect its happiness?
 
-### Question 2: How does democracy affect country happiness? (MICHAEL'S CONTRIBUTION)
-
-To measure a country's democracy level, we'll use the data from https://www.gapminder.org/data/documentation/democracy-index/, which assigns each country a democracy index. The more democratic freedoms a country has, the higher their democracy index.
+To measure a country's amount of democratic freedoms, we'll use the data from https://www.gapminder.org/data/documentation/democracy-index/, which assigns each country a democracy index. The more democratic freedoms a country has, the higher the democracy index.
 
 
 ```{r message=FALSE}
@@ -304,7 +300,7 @@ glimpse(democracy)
 
 Figure 2.1, The Democracy table has 3 variables, and DemocracyIndex is a scale from 0-100 that gets higher the more democratic freedoms a country has.
 
-This data table only provides data up to year 2018, so we'll exclude the year 2019 from our analysis.
+This dataset only provides data up to year 2018, so we'll exclude the year 2019 from our analysis.
 
 ```{r}
 w3 <- w2 %>%
@@ -337,7 +333,7 @@ w3 <- w3 %>%
   dplyr::filter(country != "Ivory Coast")
 ```
 
-Our 2 datasets are tidy and are ready to merge.
+Our 2 datasets are tidied and ready for merging.
 
 ```{r message=FALSE}
 data <- left_join(w3,democracy)
@@ -346,7 +342,7 @@ glimpse(data)
 
 Figure 2.3 A glimpse of what our final dataset looks like when the democracy index is added in.
 
-Let's visualize the relationship between the democracy index and happiness to spot any patterns.
+Let's visualize the relationship between the democracy index and the happiness score to spot any patterns. 
 
 ```{r message=FALSE}
 data %>%
@@ -395,7 +391,6 @@ function2015 <- function(x){ best2015$par[1] + best2015$par[2]*x + best2015$par[
 function2016 <- function(x){ best2016$par[1] + best2016$par[2]*x + best2016$par[3]*(x^2) }
 function2017 <- function(x){ best2017$par[1] + best2017$par[2]*x + best2017$par[3]*(x^2) }
 function2018 <- function(x){ best2018$par[1] + best2018$par[2]*x + best2018$par[3]*(x^2) }
-
 ```
 
 
@@ -429,7 +424,7 @@ ggplot(data2018) +
   labs(title="2018",x="Democracy Index",y="Happiness Score",caption="Figure 2.8 Qudratic Regression for 2018")
 ```
 
-The quadratic regression appears to fit greatly, but we must make sure that our residual plots don't exhibit any patterns, and the residuals should be distributed approximately normal around 0. The formula for a residual is (actual - expected).
+The quadratic regression appears to fit greatly, but we must make sure that our residual plots don't exhibit any patterns, and the residuals should be normally distributed around 0. The formula for a residual is (actual - expected).
 
 ```{r message=FALSE}
 data2015 <- data2015 %>%
@@ -448,7 +443,8 @@ data <-  data2015 %>%
   full_join(data2018)
 ```
 
-Now that we calculated our residua
+
+Let's make sure our residuals are normally distributed around 0.
 
 ```{r}
 ggplot(data) + 
@@ -459,7 +455,7 @@ ggplot(data) +
   labs(x="Residuals",y="Frequency",title="Residual Distribution",caption="Figure 2.9 Distribution of Residuals")
 ```
 
-Every year's residual distribution is approximately normal and centered around 0.
+Every year's residual distribution is approximately normal and centered around 0. Next we'll look for any patterns in our residual plot.
 
 ```{r}
 ggplot(data) + 
@@ -470,10 +466,67 @@ ggplot(data) +
   labs(title="Residual Plots",x="Democracy Index",y="Residuals",caption="Figure 2.10 Residual Plots")
 ```
 
-The residual plots show no pattern, so our model is a good predictor.
+The residual plots show no pattern, so our model is a pretty good estimator.
+
+We'll calculate a coefficient of determination: r-sqaured.
+
+The formula for r-squared is sum( (predicted_y - mean(y))^2 ) / sum( (observed_y - mean(y))^2 )
+
+```{r}
+rSquared2015 <- sum( ( function2015(data2015$DemocracyIndex) - mean(data2015$score) )^2) / sum( (data2015$score - mean(data2015$score))^2 )
+rSquared2016 <- sum( ( function2016(data2016$DemocracyIndex) - mean(data2016$score) )^2) / sum( (data2016$score - mean(data2016$score))^2 )
+rSquared2017 <- sum( ( function2017(data2017$DemocracyIndex) - mean(data2017$score) )^2) / sum( (data2017$score - mean(data2017$score))^2 )
+rSquared2018 <- sum( ( function2018(data2018$DemocracyIndex) - mean(data2018$score) )^2) / sum( (data2018$score - mean(data2018$score))^2 )
+
+#First we'll add the predicted DemocracyIndex values using their respected models
+#Since each year has a different model, we'll utilize nested if-else statements to use the correct model
+data %>% 
+  mutate(prediction = ifelse(year==2015,
+                             function2015(DemocracyIndex),
+                      ifelse(year==2016,
+                             function2016(DemocracyIndex),
+                      ifelse(year==2017,
+                             function2017(DemocracyIndex),
+                             function2018(DemocracyIndex)
+                                             )
+                      ))
+         ) %>% 
+#Then we'll calculate each year's coefficient or determiniation using the formula
+  group_by(year) %>%
+  summarize(rSquared = sum( (prediction - mean(score))^2) / sum( (score - mean(score))^2))
+```
+
+Table 2.11 Coefficient of determiniation for each model
+
+Based on our coefficients of determiniation, about 45%-50% of the data can be explained by our models. This isn't very good, and there may be better models, but it's also not too bad, and it may still be useful when predicting a country's happiness score based on its democracy index.
+
+We may test this out against a country that we didn't use for our model, such as Angola
+
+```{r message=FALSE}
+w %>% dplyr::filter(country=="Angola") %>% 
+  mutate(year = as.character(year)) %>% 
+  left_join(democracy) %>%
+  select(country,year,DemocracyIndex,score) %>%
+  mutate(predicted_score = ifelse(year==2015,
+                             function2015(DemocracyIndex),
+                      ifelse(year==2016,
+                             function2016(DemocracyIndex),
+                      ifelse(year==2017,
+                             function2017(DemocracyIndex),
+                             function2018(DemocracyIndex)
+                                             )
+                      ))
+         )
+```
+
+Table 2.12 Predicted happiness score for Angola is pretty close, mostly off by 1. Our model predicted that it'll have a happiness score around 4.7, while the actual happiness score is around 3.9.
+
+## Conclusion
 
 
-
+## Contributions
+Michael - Wrote question 2.
+Su Hongyang - Wrote question 1.
 
 
 
