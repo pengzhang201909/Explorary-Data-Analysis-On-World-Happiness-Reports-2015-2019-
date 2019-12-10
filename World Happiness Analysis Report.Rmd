@@ -522,7 +522,7 @@ Our model predicted that Angola would have a happiness score around 4.7 in the y
 
 ## Conclusion
 
-A country with more democratic freedoms is more likely to be happy. 
+Based on our analysis of a country's amount of democratic freedoms, a country with more democratic freedoms is more likely to be happyier than countries with lower democratic freedoms, especially when the democracy index is higher than 50. 
 
 ## Contributions
 
