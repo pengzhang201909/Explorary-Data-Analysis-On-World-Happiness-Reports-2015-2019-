@@ -519,13 +519,17 @@ w %>% dplyr::filter(country=="Angola") %>%
          )
 ```
 
-Table 2.12 Predicted happiness score for Angola is pretty close, mostly off by 1. Our model predicted that it'll have a happiness score around 4.7, while the actual happiness score is around 3.9.
+Table 2.12 Predicted happiness score for Angola 
+
+Our model predicted that Angola would have a happiness score around 4.7, while the actual happiness score is around 3.9, which is pretty close.
 
 ## Conclusion
 
+A country with more democratic freedoms is more likely to be happy.
 
 ## Contributions
-Michael - Wrote question 2.
+Alex Zhangpeng - Wrote Introduction, tidied the data, and wrote question 3, and managed project workflow on github.
+Michael Chen- Wrote question 2, and the conclusion for question 2, and also managed project workflow on github.
 Su Hongyang - Wrote question 1.
 
 
