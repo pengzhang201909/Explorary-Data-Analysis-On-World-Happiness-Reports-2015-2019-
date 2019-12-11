@@ -3,9 +3,9 @@ title: "World Happiness and Democracy"
 output: 
   github_document:
     default
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 ---
 
 
@@ -320,7 +320,7 @@ data %>%
   theme_bw()
 ```
 
-There is a interesting trend in Figure 3.4. When a country had happiness score more than 5 which meant this was a happy country(Figure 2.1), democracy had strongly positive relationship with happiness. Hong Kong had happiness score 5.4 in 2018! But when the country has a score below 5, it appears that democracy has no relationship with a country's happiness.
+There is a interesting trend in Figure 3.4. When a country had Democracy Index more than 50, democracy had strongly positive relationship with happiness. But when the country has Democracy Index below 50, it appears that democracy has no relationship with a country's happiness.
 
 For each of the years, we can see a mediocre positive quadratic relationship between the democracy index and their happiness score. Although there's more variation near the lower end of the democracy index, there's a strong correlation near the higher end of the demoracy index.
 
@@ -474,8 +474,8 @@ Table 3.12 Predicted happiness score for Angola in the year 2015
 
 Our model predicted that Angola would have a happiness score around 4.7 in the year 2015, while the actual happiness score is around 4.0. This is a moderately close estimate.
 
-## 4. Conclusion
+## Conclusion
 
-We all know that a complete and accurate data source is important and is fundamental to data analysis. That's why we used the 4E rules to do the data cleaning job. In the exciting exploratory analysis journey, we can see that the world is mostly a happy place for people, but the results were only based on a survey of a sample of 1000 people for each country. Since every country has a different amount of population, it would be more accurate if a weight was assigned for each country for calculating the world's happiness score. For future research, someone could assign an appropriate weight for each country, and re-calculate the world's happiness score.
-
-From our analysis between a country's democracy and its happiness score, a country tends to be happier when it has more democracy, especially for countries that have a happiness score greater than 5.
+We all know that a complete and accurate data source is important and is fundamental to data analysis. That's why we have accepted the 4E rules to do the data cleaning job. Especially appling the rules played a critical role in exploring some important input errors. That was absolutely a fruitful experience. 
+In the exciting exploratory analysis journey, we could see that the world is mostly a happy place for people, but the results were only based on a survey of a sample of 1000 people for each country. Since every country has a different amount of population, it would be more accurate if a weight was assigned for each country for calculating the world's happiness score. For future research, someone could assign an appropriate weight for each country, and re-calculate the world's happiness score.
+From our analysis on the relationship between a country's democracy and its happiness score, a country tends to be happier when it has more democracy, especially for countries that have democracy index more than 50.
