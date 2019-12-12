@@ -1,9 +1,9 @@
 ---
 title: "World Happiness and Democracy"
 output: 
+  pdf_document: default
   github_document:
     default
-  pdf_document: default
   html_document:
     df_print: paged
 ---
@@ -320,7 +320,15 @@ data %>%
   theme_bw()
 ```
 
-There is a interesting trend in Figure 3.4. When a country had Democracy Index more than 50, democracy had strongly positive relationship with happiness. But when the country has Democracy Index below 50, it appears that democracy has no relationship with a country's happiness.
+There were interesting trends in Figure 3.4. When a country had Democracy Index more than 50, democracy had strongly positive relationship with happiness. But when the country has Democracy Index below 50, it appears that democracy has no relationship with a country's happiness.
+
+Let's see where was Hong Kong.
+```{r, echo=FALSE}
+democracy %>% filter(country == "Hong Kong")
+```
+Table 3.5 Hong Kong's DemocracyIndex 2015-2018
+
+From Table 3.5, we saw Hong Kong's democracy quality decreased in last four years but Indexes were more than 60. This analysis might explain why people in Hong Kong who have enjoyed the benefit of democracy many years showed glory spirit to defend their democratic freedom recently.
 
 For each of the years, we can see a mediocre positive quadratic relationship between the democracy index and their happiness score. Although there's more variation near the lower end of the democracy index, there's a strong correlation near the higher end of the demoracy index.
 
@@ -365,25 +373,25 @@ ggplot(data2015) +
   #stat_function() plots a function
   stat_function(fun = function2015,color="orange") + 
   theme_bw() + 
-  labs(title="2015",x="Democracy Index",y="Happiness Score",caption="Figure 3.5 Qudratic Regression for 2015")
+  labs(title="2015",x="Democracy Index",y="Happiness Score",caption="Figure 3.6 Qudratic Regression for 2015")
 ggplot(data2016) +
   geom_point(aes(DemocracyIndex,score),color="Darkgreen") +
   geom_point(aes(DemocracyIndex,score),color="white",size=0.3) +
   stat_function(fun = function2016,color="orange") + 
   theme_bw() + 
-  labs(title="2016",x="Democracy Index",y="Happiness Score",caption="Figure 3.6 Qudratic Regression for 2016")
+  labs(title="2016",x="Democracy Index",y="Happiness Score",caption="Figure 3.7 Qudratic Regression for 2016")
 ggplot(data2017) +
   geom_point(aes(DemocracyIndex,score),color="blue") +
   geom_point(aes(DemocracyIndex,score),color="white",size=0.3) +
   stat_function(fun = function2017,color="orange") + 
   theme_bw() + 
-  labs(title="2017",x="Democracy Index",y="Happiness Score",caption="Figure 3.7 Qudratic Regression for 2017")
+  labs(title="2017",x="Democracy Index",y="Happiness Score",caption="Figure 3.8 Qudratic Regression for 2017")
 ggplot(data2018) +
   geom_point(aes(DemocracyIndex,score),color="purple") +
   geom_point(aes(DemocracyIndex,score),color="white",size=0.3) +
   stat_function(fun = function2018,color="orange") + 
   theme_bw() + 
-  labs(title="2018",x="Democracy Index",y="Happiness Score",caption="Figure 3.8 Qudratic Regression for 2018")
+  labs(title="2018",x="Democracy Index",y="Happiness Score",caption="Figure 3.9 Qudratic Regression for 2018")
 ```
 
 The quadratic regression appears to fit greatly, but we must make sure that our residual plots don't exhibit any patterns, and the residuals should be normally distributed around 0. The formula for a residual is (actual - expected).
@@ -413,7 +421,7 @@ ggplot(data) +
   geom_vline(xintercept=0,color="magenta",alpha=2/3) +
   facet_wrap(~year) + 
   theme_bw() + 
-  labs(x="Residuals",y="Frequency",title="Residual Distribution",caption="Figure 3.9 Distribution of Residuals")
+  labs(x="Residuals",y="Frequency",title="Residual Distribution",caption="Figure 3.10 Distribution of Residuals")
 ```
 
 Every year's residual distribution is approximately normal and centered around 0. Next we'll look for any patterns in our residual plot.
@@ -424,7 +432,7 @@ ggplot(data) +
   geom_point(aes(DemocracyIndex,residual,color=year)) + 
   facet_wrap(~year) + 
   theme_bw() + 
-  labs(title="Residual Plots",x="Democracy Index",y="Residuals",caption="Figure 3.10 Residual Plots")
+  labs(title="Residual Plots",x="Democracy Index",y="Residuals",caption="Figure 3.11 Residual Plots")
 ```
 
 The residual plots show no pattern, so our models are pretty good estimators.
@@ -456,7 +464,7 @@ data %>%
   summarize(rSquared = sum( (prediction - mean(score))^2) / sum( (score - mean(score))^2))
 ```
 
-Table 3.11 Coefficient of determiniation for each model
+Table 3.12 Coefficient of determiniation for each model
 
 About 45%-50% of the data can be explained by our models. This isn't very good, but it's also not too bad, and it may still be useful when predicting a country's happiness score based on its democracy index.
 
@@ -470,12 +478,12 @@ w_15 %>% dplyr::filter(country=="Angola") %>%
   mutate(predicted_score = function2015(DemocracyIndex))
 ```
 
-Table 3.12 Predicted happiness score for Angola in the year 2015
+Table 3.13 Predicted happiness score for Angola in the year 2015
 
 Our model predicted that Angola would have a happiness score around 4.7 in the year 2015, while the actual happiness score is around 4.0. This is a moderately close estimate.
 
 ## Conclusion
 
-We all know that a complete and accurate data source is important and is fundamental to data analysis. That's why we have accepted the 4E rules to do the data cleaning job. Especially appling the rules played a critical role in exploring some important input errors. That was absolutely a fruitful experience. 
-In the exciting exploratory analysis journey, we could see that the world is mostly a happy place for people, but the results were only based on a survey of a sample of 1000 people for each country. Since every country has a different amount of population, it would be more accurate if a weight was assigned for each country for calculating the world's happiness score. For future research, someone could assign an appropriate weight for each country, and re-calculate the world's happiness score.
-From our analysis on the relationship between a country's democracy and its happiness score, a country tends to be happier when it has more democracy, especially for countries that have democracy index more than 50.
+We all know that a complete and accurate data source is important and is fundamental to data analysis. That's why we have accepted the 4E rules to do the data cleaning job. In this case appling the rules played a critical role in exploring some important input errors. That was absolutely a fruitful experience. 
+In the exciting exploratory analysis journey, we could see that the world was mostly a happy place for people, but the results were only based on the surveys of a sample of 1000 people for each country. Since every country has a different amount of population, it would be more accurate if a weight was assigned for each country for calculating the world's happiness score. For future research, someone could assign an appropriate weight for each country, and re-calculate the world's happiness score.
+From this analysis on the relationship between a country's democracy quality and happiness, a country tends to be happier when it has more democracy, especially for countries that have democracy index more than 50. Hong Kong was an outstanding example this year. It has had good democracy quality for many years but situation has been going worse. Unhappiness represents itself in 2019 Hong Kong Protests.
